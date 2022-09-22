@@ -105,3 +105,4 @@ dist
 
 spec.md
 .idea
+/package-lock.json
