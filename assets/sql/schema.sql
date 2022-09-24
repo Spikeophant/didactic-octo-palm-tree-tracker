@@ -4,13 +4,13 @@ USE employees;
 
 CREATE TABLE department (
     id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(30) NOT NULL,
+    name VARCHAR(30) NOT NULL UNIQUE,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE role (
     id INT NOT NULL AUTO_INCREMENT,
-    title VARCHAR(30) NOT NULL,
+    title VARCHAR(30) NOT NULL UNIQUE,
     salary DECIMAL NOT NULL,
     department_id INT,
     FOREIGN KEY (department_id) REFERENCES department (id) ON DELETE RESTRICT,
