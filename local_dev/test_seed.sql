@@ -11,6 +11,6 @@ INSERT INTO role (title, salary, department_id) VALUES ('Sr. Manager Engineering
                                                       ('Logistics Coordinator', 135000.00, 5);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('Jack', 'Sparrow', 1, NULL),
-                                                                         ('Gordon', 'Freeman', 2, 2),
+                                                                         ('Gordon', 'Freeman', 2, 1),
                                                                          ('Kelly', 'VonNeuman', 3, NULL),
                                                                          ('Bruce', 'Banner', 4, 3);
