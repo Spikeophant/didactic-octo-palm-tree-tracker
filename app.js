@@ -1,10 +1,9 @@
 const inquirer = require('inquirer');
-const mysql = require('mysql2');
 const db = require('./lib/dbConn');
 const questions = require('./lib/questions');
 
 
-//make a IIFE so it doesn't pollute the namespace.
+//make a IIFE, so it doesn't pollute the namespace.
 (function optionsMenu() {
   return inquirer.prompt(questions.optionsMenu).then((answers) => {
     if (answers.options === 'Exit.') {
@@ -57,7 +56,7 @@ const questions = require('./lib/questions');
       inquirer.prompt(questions.addRole).then((answers) => {
         db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)',
           [answers.title, answers.salary, answers.deptId],
-          (err, data_)=> {
+          (err, data)=> {
           if (err) {
             console.log(err);
             process.exit(0);
