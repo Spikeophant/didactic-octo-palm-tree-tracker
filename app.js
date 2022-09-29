@@ -80,14 +80,16 @@ const questions = require('./lib/questions');
       })
     } else if (answers.options === 7) {
       let empId;
+      let roleId;
+      let emps = [];
+      let roles = [];
       db.query('SELECT * FROM employee', (err, data) => {
         console.table(data);
-        let emps = [];
-        let roles = [];
+
         for (const i in data) {
            emps.push({
              name: `${data[i].first_name} ${data[i].last_name}`,
-             value: `[data[i].role_id, data[i].id]`,
+             value: [data[i].role_id, data[i].id],
            })
 
         }
@@ -95,33 +97,27 @@ const questions = require('./lib/questions');
           name: 'employeeId',
           type: 'list', choices: emps}]).then((answers) => {
           empId = answers.employeeId[1];
-          db.query('SELECT * FROM role', (err, result) => {
-            if (!err) {
+          console.log(answers.employeeId);
+          db.query('SELECT * FROM role', (er, result) => {
+            console.table(result);
               for (const i in result) {
                 roles.push({
                   name: `${result[i].title} - ${result[i].salary}`,
-                  value: result[i].role_id,
+                  value: result[i].id,
                 })
               }
-              console.table(result);
               inquirer.prompt([{
                 name: 'roleId',
                 type: 'list',
                 choices: roles,
                 message: 'Please select a role OPERATOR!'
-              }]).then( (answers) =>
-                db.query('UPDATE employee SET role_id = ? WHERE id = ?',
-                  [answers.roleId, empId], (err, result) => {
-                  if (err) {
-                    console.log(err);
-                    process.exit(0)
-                  } else {
-                    console.table(result);
-                    return optionsMenu();
-                  }
-                })
+              }]).then( (ans) => {
+                console.log(ans)
+                roleId = ans.roleId;
+                console.log(empId, roleId)
+                db.promise().query('UPDATE employee SET role_id = ? WHERE id = ?',
+                  [roleId, empId]).then(() =>{return optionsMenu()})}
               )
-            }
           })
         });
       })
