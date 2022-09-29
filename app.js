@@ -6,9 +6,9 @@ const questions = require('./lib/questions');
 //make a IIFE, so it doesn't pollute the namespace.
 (function optionsMenu() {
   return inquirer.prompt(questions.optionsMenu).then((answers) => {
-    if (answers.options === 'Exit.') {
+    if (answers.options === 0) {
       process.exit();
-    } else if (answers.options === 'View all employees.') {
+    } else if (answers.options === 3) {
       db.query('SELECT * FROM employee', '', (err, employees) => {
         if (!err) {
           console.log('Congratulations, you have successfully selected view all employees!')
@@ -16,31 +16,31 @@ const questions = require('./lib/questions');
           return optionsMenu();
         } else console.log(err)
       })
-    } else if (answers.options === 'View all departments.') {
+    } else if (answers.options === 1) {
       db.query('SELECT * FROM department', '', (err, departments) => {
         if (!err) {
           console.log('You have selected all departments yay!  Thank you for your selection, please view below!');
           console.table(departments)
+          return optionsMenu();
         } else {
           console.log(err);
           process.exit(1)
       }
       })
-      return optionsMenu();
-    } else if (answers.options === 'View all roles.') {
+    } else if (answers.options === 2) {
       db.query('SELECT * FROM role', '',
         (err, roles) => {
         if(!err) {
           console.log('You have selected to view all roles, please enjoy your response.');
           console.table(roles);
+          return optionsMenu();
         } else {
           console.log(err);
           process.exit(1);
         }
 
       })
-      return optionsMenu()
-    } else if (answers.options === 'Add a department.') {
+    } else if (answers.options === 4) {
       inquirer.prompt(questions.addDepartment).then((answers) => {
         db.query('INSERT INTO department (name) VALUES (?)', answers.name,
           (err, data) => {
@@ -52,7 +52,7 @@ const questions = require('./lib/questions');
           }
         });
       })
-    } else if (answers.options === 'Add a role.') {
+    } else if (answers.options === 5) {
       inquirer.prompt(questions.addRole).then((answers) => {
         db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)',
           [answers.title, answers.salary, answers.deptId],
@@ -65,11 +65,11 @@ const questions = require('./lib/questions');
           }
         })
       })
-    } else if (answers.options === 'Add an employee.') {
+    } else if (answers.options === 6) {
       inquirer.prompt(questions.addEmployee).then( (answers) => {
         db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)',
           [answers.first_name, answers.last_name, answers.role_id, answers.manager_id],
-          (err, result) => {
+          (err) => {
           if (err) {
             console.log(err);
             process.exit(1);
@@ -78,10 +78,56 @@ const questions = require('./lib/questions');
           }
           })
       })
-    }
+    } else if (answers.options === 7) {
+      let empId;
+      db.query('SELECT * FROM employee', (err, data) => {
+        console.table(data);
+        let emps = [];
+        let roles = [];
+        for (const i in data) {
+           emps.push({
+             name: `${data[i].first_name} ${data[i].last_name}`,
+             value: `[data[i].role_id, data[i].id]`,
+           })
 
+        }
+        inquirer.prompt([{
+          name: 'employeeId',
+          type: 'list', choices: emps}]).then((answers) => {
+          empId = answers.employeeId[1];
+          db.query('SELECT * FROM role', (err, result) => {
+            if (!err) {
+              for (const i in result) {
+                roles.push({
+                  name: `${result[i].title} - ${result[i].salary}`,
+                  value: result[i].role_id,
+                })
+              }
+              console.table(result);
+              inquirer.prompt([{
+                name: 'roleId',
+                type: 'list',
+                choices: roles,
+                message: 'Please select a role OPERATOR!'
+              }]).then( (answers) =>
+                db.query('UPDATE employee SET role_id = ? WHERE id = ?',
+                  [answers.roleId, empId], (err, result) => {
+                  if (err) {
+                    console.log(err);
+                    process.exit(0)
+                  } else {
+                    console.table(result);
+                    return optionsMenu();
+                  }
+                })
+              )
+            }
+          })
+        });
       })
-    })
+    }
+  })
+})
 ();
 
 
